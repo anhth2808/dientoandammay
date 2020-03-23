@@ -35,9 +35,13 @@ app.get("/", (req, res) => {
 
 
 app.get("/create", (req, res) => {
+    let title = req.body.title;
+    let content = req.body.content;
+
+
     const info = new Info({
-        title: "info 2",
-        content: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse quasi incidunt placeat eos at totam repudiandae perferendis aspernatur harum. Quam, distinctio quae. Quidem, officiis dolorem corporis harum aperiam pariatur non!"
+        title: title || "info title",
+        content: content || "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse quasi incidunt placeat eos at totam repudiandae perferendis aspernatur harum. Quam, distinctio quae. Quidem, officiis dolorem corporis harum aperiam pariatur non!"
     })
 
     info.save()
