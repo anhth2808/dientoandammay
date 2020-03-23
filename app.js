@@ -1,66 +1,73 @@
 const express = require("express")
-const mongoose = require("mongoose")
 const bodyParser = require('body-parser');
-const Info = require("./models/Info")
-
-const MONGODB_URI = require("./utils/configs.js").MONGODB_URI
-
+const firebase = require('firebase')
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
 //
+firebase.initializeApp({
+  serviceAccount: "./products-fdfda-95d0ad427a8c.json",
+  databaseURL: "https://products-fdfda.firebaseio.com"
+})
+const ProductsRef =  firebase.database().ref('Products')
 
 
+app.use(bodyParser.urlencoded({ extended: false }))
 
+app.set('view engine', 'pug')
+app.set('views', 'views')
+
+// routes
 app.get("/", (req, res) => {
-    Info.find({})
-        .then(result => {
-            console.log(result)
-            res.json({
-                data: result
-            })
-            // result.forEach(info => {
-            //     res.write(`<h1>${info.title}</h1>`)
-            //     res.write(`<p>${info.content}</p>`)
-            // })
-            res.end()
-        })
-        .catch(err => {
-            console.log(err)
-        })
-
-   
+  const data = []
+  ProductsRef.once('value')
+    .then((snap) => {
+      // console.log(snap.key, "\n\n")
+      // console.log(snap.ref.toString(), "\n\n")
+      snap.forEach(e => {
+        data.push(e.val())
+      })
+      // res.send("123")
+      res.render('./product/index', {
+        products: data
+      })
+    })
 })
 
 
 app.get("/create", (req, res) => {
-    let title = req.body.title;
-    let content = req.body.content;
-
-
-    const info = new Info({
-        title: title || "info title",
-        content: content || "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse quasi incidunt placeat eos at totam repudiandae perferendis aspernatur harum. Quam, distinctio quae. Quidem, officiis dolorem corporis harum aperiam pariatur non!"
-    })
-
-    info.save()
-        .then(result => {
-            console.log("Created an info", result)
-            res.json({status: 200, message: "Success created"})
-        })
-        .catch(err => {
-            console.log(err)
-        })
+  res.status(500).render('./product/product-create', { 
+  });
 })
 
+app.post("/create", (req, res) => {
+  let title = req.body.title
+  let price = req.body.price
+  if (title && price) {
+    ProductsRef.push({
+      title: title,
+      price: price
+    })
+    .then(result => {
+      console.log('Created product')
+      res.redirect('/')
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
+})
 
+app.get("/api", (req, res) => {
+  const data = []
+  ProductsRef.once('value')
+    .then((snap) => {
+      snap.forEach(e => {
+        data.push(e.val())
+      })
+      res.json(data)
+    })
+})
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(result => {
-    app.listen( process.env.PORT || 6969)
-  })
-  .catch(err => {
-    console.log(err)
-  })
+app.listen( process.env.PORT || 6969)

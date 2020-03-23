@@ -1,0 +1,36 @@
+extends ../layouts/main-layout.pug
+
+include ../_includes/sharedHTMLfunctions.pug
+
+block styles
+  style.
+    table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    }
+    td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    }
+    tr:nth-child(even) {
+    background-color: #dddddd;
+    }
+block content
+  h1 List product
+  
+  <table>
+    <tr>
+      <th>Title</th>
+      <th>Price</th>
+    </tr>
+    each product in products
+      <tr>
+        <td>#{product.title}</td>
+        <td>#{product.price}</td>
+      </tr>
+  </table>
+
+  
+block scripts
